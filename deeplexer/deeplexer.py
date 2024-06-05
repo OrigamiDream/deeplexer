@@ -325,7 +325,7 @@ class _Deeplexer:
                                         data=payload,
                                         allow_redirects=False) as res:
                     if res.status != 302 and res.status != 301:
-                        raise ValueError('DeepL sign in service returned status code:', res.status)
+                        raise ValueError(f'DeepL sign in service returned status code: {res.status} {res.reason}')
 
                     location = res.headers['Location']
             params = location.split('?')[1]
