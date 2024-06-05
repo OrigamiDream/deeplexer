@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='deeplexer',
-    version='0.0.3',
+    version='0.0.4',
     description='Free DeepL Pro even Quota Exceeded',
     url='https://github.com/OrigamiDream/deeplexer.git',
     author='OrigamiDream',

@@ -6,6 +6,7 @@ import random
 import secrets
 import time
 from dataclasses import dataclass, asdict
+from enum import Enum
 from hashlib import sha256
 from typing import List, Optional, Union
 from urllib import parse
@@ -43,8 +44,7 @@ class _Translation:
     text: str
 
 
-@dataclass
-class _BrowserType:
+class _BrowserType(Enum):
     CHROMIUM = 'chromium'
     FIREFOX = 'firefox'
     WEBKIT = 'webkit'
@@ -106,14 +106,19 @@ class _Deeplexer:
                  session_file: str,
                  username: Optional[str] = None,
                  password: Optional[str] = None,
-                 browser_type: _BrowserType = _BrowserType.CHROMIUM,
+                 browser_type: Union[str, _BrowserType] = _BrowserType.CHROMIUM,
                  user_agent: str = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:128.0) Gecko/20100101 Firefox/128.0',
                  chrome_extension_version: str = '1.12.3',
                  chrome_extension_app_id: str = 'cofdbpoegempjloogbagkncekinflcnj'):
         self._session_file = session_file
         self._username = username
         self._password = password
-        self._browser_type = browser_type
+
+        if isinstance(browser_type, str):
+            self._browser_type = _BrowserType[browser_type.upper()]
+        else:
+            self._browser_type = browser_type
+
         self._user_agent = user_agent
         self._chrome_extension_app_id = chrome_extension_app_id
         self._chrome_extension_version = chrome_extension_version
