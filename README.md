@@ -11,9 +11,9 @@ import asyncio
 from deeplexer import Deeplexer
 
 async def main():
-    session_file = './sessions.json'  # required
-    username = '<deepl username>'  # optional if session file is valid
-    password = '<deepl password>'  # optional if session file is valid
+    session_file = './sessions.json'  # Required. Path to the session be stored.
+    username = '<deepl username>'  # Optional if session file is valid
+    password = '<deepl password>'  # Optional if session file is valid
     async with Deeplexer(session_file, 
                          username=username, 
                          password=password) as deeplex:

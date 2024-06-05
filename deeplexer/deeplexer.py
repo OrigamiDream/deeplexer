@@ -137,15 +137,21 @@ class _Deeplexer:
             self,
             text: Union[str, List[str]],
             source_lang: str,
-            target_lang: str) -> Union[_Translation, List[_Translation]]:
+            target_lang: str,
+            proxy: Optional[str] = None) -> Union[_Translation, List[_Translation]]:
         if isinstance(text, str):
-            translations = await self._translate_batch([text], source_lang, target_lang)
+            translations = await self._translate_batch([text], source_lang, target_lang, proxy)
             assert len(translations) > 0, 'The translation has not returned proper results.'
             return translations[0]
         else:
-            return await self._translate_batch(text, source_lang, target_lang)
+            return await self._translate_batch(text, source_lang, target_lang, proxy)
 
-    async def _translate_batch(self, texts: List[str], source_lang: str, target_lang: str) -> List[_Translation]:
+    async def _translate_batch(
+            self,
+            texts: List[str],
+            source_lang: str,
+            target_lang: str,
+            proxy: Optional[str] = None) -> List[_Translation]:
         async def _inner_translate_loop() -> Optional[List[_Translation]]:
             random.seed(time.time())
             num = random.randint(8300000, 8399998) * 1000
@@ -187,7 +193,7 @@ class _Deeplexer:
                     },
                     'id': num,
                 }
-                async with session.post(self._json_rpc_url(), headers=headers, json=payload) as res:
+                async with session.post(self._json_rpc_url(), headers=headers, json=payload, proxy=proxy) as res:
                     if res.status != 200:
                         return None
 
