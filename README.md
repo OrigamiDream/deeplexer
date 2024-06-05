@@ -5,6 +5,9 @@ Working DeepL Pro even Quota Exceeded.
 Use your own risks.
 
 ## Usage
+```
+pip install deeplexer
+```
 
 ```python
 import asyncio
