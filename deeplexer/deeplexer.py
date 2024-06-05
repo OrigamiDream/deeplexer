@@ -43,6 +43,13 @@ class _Translation:
     text: str
 
 
+@dataclass
+class _BrowserType:
+    CHROMIUM = 'chromium'
+    FIREFOX = 'firefox'
+    WEBKIT = 'webkit'
+
+
 def _random_hash() -> str:
     array_buffer = [secrets.randbits(32) for _ in range(28)]
     values = []
@@ -85,6 +92,7 @@ class _Deeplexer:
     _username: Optional[str] = None
     _password: Optional[str] = None
 
+    _browser_type: _BrowserType = _BrowserType.CHROMIUM
     _authorized: bool = False
 
     _client_id: str = 'chromeExtension'
@@ -98,12 +106,14 @@ class _Deeplexer:
                  session_file: str,
                  username: Optional[str] = None,
                  password: Optional[str] = None,
+                 browser_type: _BrowserType = _BrowserType.CHROMIUM,
                  user_agent: str = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:128.0) Gecko/20100101 Firefox/128.0',
                  chrome_extension_version: str = '1.12.3',
                  chrome_extension_app_id: str = 'cofdbpoegempjloogbagkncekinflcnj'):
         self._session_file = session_file
         self._username = username
         self._password = password
+        self._browser_type = browser_type
         self._user_agent = user_agent
         self._chrome_extension_app_id = chrome_extension_app_id
         self._chrome_extension_version = chrome_extension_version
@@ -267,7 +277,13 @@ class _Deeplexer:
 
         async def _create_cookies() -> List[Cookie]:
             async with async_playwright() as p:
-                browser = await p.chromium.launch(headless=False)
+                if self._browser_type == _BrowserType.CHROMIUM:
+                    browser = await p.chromium.launch(headless=False)
+                elif self._browser_type == _BrowserType.FIREFOX:
+                    browser = await p.firefox.launch(headless=False)
+                elif self._browser_type == _BrowserType.WEBKIT:
+                    browser = await p.webkit.launch(headless=False)
+
                 context = await browser.new_context()
                 page = await context.new_page()
                 await page.goto(oidc_body.url)
@@ -308,7 +324,7 @@ class _Deeplexer:
                                         headers=headers,
                                         data=payload,
                                         allow_redirects=False) as res:
-                    if res != 301:
+                    if res.status != 302 and res.status != 301:
                         raise ValueError('DeepL sign in service returned status code:', res.status)
 
                     location = res.headers['Location']
