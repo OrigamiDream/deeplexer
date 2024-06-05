@@ -179,7 +179,7 @@ class _Deeplexer:
                     'jsonrpc': '2.0',
                     'method': 'LMT_handle_texts',
                     'params': {
-                        'texts': [{'text': text} for text in texts],
+                        'texts': [{'text': text.replace('\n', '<br>')} for text in texts],
                         'html': 'enabled',
                         'lang': {
                             'target_lang': target_lang.upper(),
@@ -199,8 +199,8 @@ class _Deeplexer:
 
                     body = await res.json()
             return [_Translation(
-                alternatives=result['alternatives'],
-                text=result['text'],
+                alternatives=[alternative.replace('<br>', '\n') for alternative in result['alternatives']],
+                text=result['text'].replace('<br>', '\n'),
             ) for result in body['result']['texts']]
 
         translations = await _inner_translate_loop()
@@ -308,6 +308,9 @@ class _Deeplexer:
                                         headers=headers,
                                         data=payload,
                                         allow_redirects=False) as res:
+                    if res != 301:
+                        raise ValueError('DeepL sign in service returned status code:', res.status)
+
                     location = res.headers['Location']
             params = location.split('?')[1]
             params = parse.parse_qs(params, keep_blank_values=True)
